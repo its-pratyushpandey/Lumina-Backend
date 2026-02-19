@@ -7,6 +7,16 @@ import createApp from './app.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '.env') });
 
+process.on('unhandledRejection', (reason) => {
+  console.error('❌ Unhandled promise rejection:', reason);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught exception:', err);
+  process.exit(1);
+});
+
 const DEFAULT_PORT = 8001;
 const HOST = process.env.HOST || '0.0.0.0';
 const isPortExplicit = typeof process.env.PORT === 'string' && process.env.PORT.trim().length > 0;
@@ -16,7 +26,16 @@ if (!Number.isFinite(initialPort) || initialPort <= 0) {
   throw new Error(`Invalid PORT value: ${process.env.PORT}`);
 }
 
-await connectDB();
+try {
+  await connectDB();
+} catch (err) {
+  console.error('❌ Failed to connect to MongoDB.');
+  console.error(err);
+  console.error(
+    'ℹ️  On Render, set MONGO_URL and DB_NAME in the service Environment settings (or set USE_IN_MEMORY_DB=true for a temporary in-memory DB).'
+  );
+  process.exit(1);
+}
 
 const app = createApp();
 

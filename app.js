@@ -17,9 +17,14 @@ import adminRoutes from './routes/adminRoutes.js';
 const createApp = () => {
   const app = express();
 
+  const corsOrigins = String(process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   app.use(
     cors({
-      origin: process.env.CORS_ORIGINS?.split(',') || '*',
+      origin: corsOrigins.length > 0 ? corsOrigins : '*',
       credentials: true,
     })
   );

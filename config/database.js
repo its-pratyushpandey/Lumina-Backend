@@ -83,8 +83,8 @@ const seedSampleDatabaseIfEmpty = async () => {
 };
 
 const connectDB = async () => {
-  let mongoUrl = process.env.MONGO_URL;
-  let dbName = process.env.DB_NAME;
+  let mongoUrl = typeof process.env.MONGO_URL === 'string' ? process.env.MONGO_URL.trim() : undefined;
+  let dbName = typeof process.env.DB_NAME === 'string' ? process.env.DB_NAME.trim() : undefined;
 
   if (!mongoUrl && process.env.USE_IN_MEMORY_DB === 'true') {
     const { MongoMemoryServer } = await import('mongodb-memory-server');
@@ -99,10 +99,12 @@ const connectDB = async () => {
   }
 
   if (!mongoUrl) {
-    throw new Error('Missing MONGO_URL');
+    throw new Error(
+      'Missing MONGO_URL. Set it in the environment (e.g., Render dashboard) to your MongoDB Atlas connection string.'
+    );
   }
   if (!dbName) {
-    throw new Error('Missing DB_NAME');
+    throw new Error('Missing DB_NAME. Set it in the environment (e.g., Render dashboard), e.g. lumina.');
   }
 
   await mongoose.connect(mongoUrl, { dbName });
